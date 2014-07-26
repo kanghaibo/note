@@ -1,0 +1,811 @@
+一，第一个C++程序
+1，#include 后面加文件名，后缀无所谓
+2，using namespace 两个keyword。
+3，c++ is c like。
+
+#include <iostream>
+using namespace std;
+int main()
+{
+	cout << "hello world! i am " << 18 << "today!" << endl;
+	return 0;
+}
+cout -- standard output, 左移
+
+read input ，cin 右移,无需&，cin自己控制
+#include <iostream>
+using namespace std;
+int main()
+{
+	int number;
+	cout << "enter a decimal number:";
+	cin >> number;
+	cout << "ther number you entered is " << number << "."<<endl;
+	return 0;
+}
+
+二，什么是对象？
+object 对象
+oriented 源于，源自于，导向
+从对象出发考虑问题
+object=entity 东西
+东西可见或不可见
+程序语言中对象就是变量。变量有类型，类型决定它能放什么。
+从另一个角度看，对象=属性+服务。
+data：the properties or status。
+operations：the functions。
+数据受保护，通过服务操作访问数据。
+
+问题空间----解决空间 描述
+c语言：过程写清楚，一步一步的步骤，用c语言表达式描述出来。
+时间到，走进教室，打开投影仪。。。。
+c++：定义一个教师，很多学生，一个投影仪，电脑，他们之间关系。
+这样描述：这个场景有什么东西，东西之间关系。面向对象。
+这样描述：事情发生的流程是怎么样，按照时间顺序它会一步步发生什么事情。面向过程。
+区别：从时间顺序分析，从存在什么东西分析。
+
+三维坐标点。
+c：
+typedef struct point3d{
+	float x;
+	float y;
+	float z;	
+}point3d;
+void point3d_print(const point3d *pd);
+point3d a;
+a.x = 1; a.y = 2; a.z = 3;
+point3d_print(&a);
+
+c++:
+class point3d{
+public:
+	point3d(float x, flaot y, float z);
+	print();
+private:
+	float x;
+	float y;
+	float z;
+};
+point3d a(1,2,3);
+a.print();
+任何变量都是对象。
+
+c vs c++
+结构体中：数据，数据和操作
+object-oriented，一种方法，a way to organize：
+	组织设计designs（找出思路）和实现（代码写出来）。
+设计和具体语言无关。
+面向对象语言做实现，面向对象思想做设计。
+
+对象，是设计和实现主要关注的东西。
+而不是控制或者数据流，
+
+关注东西，而不是操作。to focus on things，not operations。
+
+三，面向对象的基本理念（原理）
+对象和对象之间互相发送和接受消息的。
+objects send and receive message（objects do things）。
+对象和对象之间交换的形式是消息。
+message are：
+	composed by the sender.//组成被发送者
+	interpreted by the receiver.//解释被接受者
+	implemented by methods.//被方法实现
+messages：
+	may cause receiver to change state.
+	may return results.
+
+物以类聚 人以群分
+
+objects 东西，实体   classes 东西的种类，概念
+这个东西是对象。
+object is a class。
+class defines object。
+类和类型是一样的。
+类定义对象是什么样。
+对象是类的一个东西。
+
+oop smtalk
+1，enerything is an object;
+2，a program is bunch of objects telling each other what to do by sending message;
+程序是一堆对象。这堆对象通过发送消息互相告诉别人做什么。
+c语言是一堆的函数，其中有一个是main，从main出发，从运行时刻把这些函数串起来，某一时刻肯定在某个函数，这个函数可能会调用其他函数，回到mian函数结束。c是函数的集合。（全局变量）
+3，each object has its own memory made up of other objects。
+每一个对象有它自己的内存，这个内存里面是由其他对象组成的。
+4，every object has a type。任何东西都是由某种类型定义出来的。
+5，all objects of a particular type can receive the same messages。
+一个特定类型的所有对象都是接受相同的消息。所有可以接受相同的消息的对象可以被认为是相同的类型。
+
+对象---操作+数据
+操作---接口
+对象都是通过接口和外界打交道。
+
+自然界中接口很容易观察到。具有什么样的接口的是什么东西。遵循某个接口，接口外面的东西可以换。
+松散，接口，在程序中也可以拆换。耦合程度， 松， 紧。
+接口：通信交流communication，保护protection
+对程序而言：接口隐藏一些东西。隐藏实现。the hidden implementation。
+
+封装：encapsulation 把数据和对这些数据所有的操作放在一起，数据隐藏起来，外界只能访问公开的那部分操作。
+
+
+抽象：在某些层次上就不往下具体细分了，屏蔽了细节，只看某种层次的大局。
+
+
+四，自动售票机例子
+过程：走到机器前，放钱，打印车票，拿票走人
+仿真对象：
+price balance total
+show prompt
+print balance
+insert money
+print ticket
+
+UML
+ticketmachine
+--------------
+price
+balance
+total
+--------------
+show_prompt
+get_money
+print_ticket
+show_balance
+print_error
+
+class ticket_machine{
+public:
+	void show_prompt();
+	void get_money();
+	void print_ticket();
+	void show_balance();
+	void print_error();
+private:
+	const int price;
+	int balance;
+	int total;
+};
+
+每一个类都应该有2个源代码文件，一个头文件.h，一个body文件.cpp。
+在.cpp文件所要描述的类的实体是由.h声明，在.cpp中定义在.h中声明的那些东西的实体。
+
+构造函数（无返回类型？）， 析构函数
+
+:: 域解析符  resolver
+这个函数在一个类中的函数。::前面没有类名是全局的函数
+<class name>::<<function name>
+::<function name> 
+
+void s::f(){
+	::f();//全局函数f
+	::a++;//全局变量a
+	a--;//s类中变量a
+}
+
+::表示我是在什么范围内的一个东西
+
+五，头文件
+定义一个类：
+1，用分离的.h和.cpp文件来定义一个类。
+2，类的声明declaration和类里面函数的原型放在.h
+3，这些函数所以的body（definition）都要放在.cpp。
+
+头文件：
+1，函数声明在头文件里面，用到函数或定义函数的地方include。
+2，类在头文件中声明，所以用到类或定义类里面实体的地方都要include
+
+
+header = interface
+1，你和你代码使用者之间的一个约定，做这个类的人告诉使用这个类的人，我这里面有一些什么样的东西，这些东西 你可以怎么样的去用。
+2，编译器强化约定，要求你使用这些类，函数之前要声明。
+
+c++程序
+.h   declaration
+.cpp  definition
+任何一个类（.h .cpp）都应成对存在，.cpp include .h
+
+#编译预处理指令
+将.cpp文件读进去，找到里面#开头的指令，include它把你给的文件，整个文本放到.cpp，形成一个大的编译前用的文件。
+include 文本的插入
+g++ a.cpp --save-temps
+
+duplicate 复制
+c++ 编译器所有的名字都会加上下划线。
+ld：链接器
+
+解释语言vs编译语言
+语言本身无编译/解释之分
+常用的执行方式而已
+解释型语言有特殊的计算能力
+编译型语言有确定的运行性能
+
+
+
+六，时钟的例子
+clock display
+c，写循环
+c++，不关注过程，关注有什么东西
+
+abstract 抽象
+1，抽象：当你在看到一个事情时，有意的去看不见一些细节。看事情时，在某个层面上考虑问题，这种能力就是抽象。
+2，
+
+时钟分成2个部分，11 03，类功能有相同。
+
+
+七，成员变量
+本地变量（局部变量）
+在函数内部定义，在函数内部存在有效，离开不存在无效。
+
+本地变量，成员变量区别，作用域，存在地点不同。
+就近原则
+
+C++三种变量：
+fields，parameters,local variables
+成员变量（类的所有的函数之外，对象生存期一直存在，类的作用域）；
+类中有成员变量，成员函数。
+函数参数；
+本地变量，就是局部变量。
+
+类的定义是声明。
+成员变量在每个类的对象里面。
+类是虚的，不可能有变量。
+成员函数属于类的。
+
+#include <iostream>
+
+class A{
+	private:
+		int i;
+	public:
+		void f(){};
+};
+strcut{
+	int i;
+}B;
+void A::f()
+{
+	i = 20;
+	cout << i << endl;
+}
+void f(struct B *p)
+{
+	p->i = 20;
+	cout << p->i << endl;
+}
+int main()
+{
+	A a;
+	B b;
+	a.i = 10;
+	cout << a.i;
+	a.f();
+	f(&b);
+}
+
+对象和成员变量联系建立的方式，this
+void point::print();
+void point::print(point *p);
+point a;
+a.print();
+----
+point::print(&a);
+隐藏的。
+可以打印this的地址。
+
+this:pointer to the caller;
+this is a natural local variable of all class;
+
+九：构造与析构
+对象创建的时候如何自动初始化所有成员变量的值，是保证对象运行正确的重要条件。构造函数能在对象创建的时候自动执行。当对象不再需要时，也同样需要自动执行的函数来保证资源的释放，那就是析构函数。
+
+class point{
+	public:
+		void init(int x, int y);
+		void print() const;
+		void move(int dx, int dy);
+	private:
+		int x;
+		int y;
+};
+
+point a;
+a.init(1,2);
+a.move(2,2);
+a.print();
+
+vc vs debug模式下会自己清理空间，0xcd，gb2312下2个字节烫。
+构造函数帮你做清理。guaranteed;构造器或构造函数相同，翻译问题。
+构造函数与类名相同，无放回类型，可以有参数。
+class x{
+	int i;
+public:
+	x();
+}
+类创建对象时被自动调用。
+printf最好不要和cout混合用。
+
+构造函数加参数：
+Tree(int i){..};
+Tree t(12);
+think in  c++, C06:Constructor1.cpp;
+
+析构函数：destructor，对象要被销毁掉之前是自动调用。
+class Y{
+	public:
+	~Y();
+};
+对象被销毁之前调用。
+
+十：对象初始化
+对象在什么时候做初始化？本地变量对象的初始化顺序如何？什么是默认构造函数？如何做集合初始化？
+
+存储：编译器在大括号开始的地方分配括号里面所有的变量的空间，构造函数的调用要在函数定义的地方才发生。
+think in c++，Nojump.cpp
+
+struct X{int i; float f;}
+X x1 = {1,2.2,'c'};
+X x2[] = {{1,2.2,'c'},{1,2.2,'d'}};
+struct Y{float f; int i; Y(int a);};
+Y y1[] = {Y(1), Y(2)};
+Y y2[2] = {Y(1)};(error),错误看不懂的。
+缺省（默认）构造函数，没有参数就是缺省构造；
+编译器给你的是自动缺省构造函数。
+
+十一：new & delete
+动态申请对象
+new：
+	new int;
+	new stash;//对象
+	new int[10];
+做2件事情，先分配空间，再new类时调用构造函数。（返回空间地址）
+delete:
+	delete p;
+	delete[] p;
+new的时候代[]，delete要带[]；
+delete时析构函数先被调用。
+
+int *psome = new int [10];
+delete[] psome;
+
+c++运行库，c++程序起来时操作系统会给一定的内存。
+一张表，记录申请的内存地址和大小。
+
+int *p = new int;
+delete p;
+
+int *a = new int[10];
+a++; delete[] a;//运行错误，验证没有问题，查看
+
+student *q = new student();
+delete q;//q有类型，调用析构，释放。
+
+student *r = new student[10];
+delete r;//没有告诉r指向多个，只调用r指向的对象的析构，但空间都收回了，但析构函数只做了一个。可以试试。
+delete[] r;
+new 和delete顺序相反
+
+不要用delete释放不是new出的东西。
+不要两次delete。
+delete[]， new[]
+delete NULL;//对的
+
+构造里面new的，在析构里面delete；
+
+十二，访问限制
+一个类的哪些成员可以被哪个范围的函数访问是OOP设计中重要的手段。C++提供了public、private和protected三种访问属性。本课时解释了前两种访问属性和友元的概念。
+
+setting limits
+类里面那些成员可以被别人访问，那些可以被自己访问。
+oop，对象是封装起来的，对象是应该是被保护的，对象里面的数据应该不能被直接访问，别人能够使用函数做事情，函数对类中数据影响是自己决定。
+
+使用类的程序员不能随心所欲的访问类里面的东西。
+写类的程序员可以修改类内部的东西，而不至于会影响到使用者。
+
+c++ access control
+public 任何人
+private 类的成员函数可以访问成员变量或成员函数
+自己：类的成员函数，private可以是变量或函数。
+private是对类来说的，同一类的对象之间可以互相访问私有成员变量。
+class A{
+	private:
+		int i;
+	public:
+		A(){cout << "A::A()" << endl;}
+		~A(){cout << "A:~A()" << endl;}
+		void set(int i){this->i = i;}
+		void g(A* q){cout << "A::g(),q->i" << q->i << endl;}
+};
+int main()
+{
+	A *p = new A[10];
+	for(int i = 0; i < 10; i++)
+		p[i].set(i);
+	A b;
+	b.set(100);
+	p[0].g(&b);
+	delete[] p;
+	return 0;
+}
+
+private权限限制仅仅在编译时刻，只有编译器检查，运行时刻无所谓。
+运行时刻可以访问别的类的私有的东西。
+c++ 的oop特性只在源代码级别存在。编译完后就不是oop的东西，目标文件同c一样。
+
+protected 类的自己以及子子孙孙可以访问。
+
+friends 友元 破坏oop原则
+你可以声明别人是你的朋友。朋友就可以访问你private的东西。
+别人可以是别的类，别的函数（free 函数），别的类中的某个函数。
+
+你说别人是你的朋友，不是说我是谁的朋友。
+
+friend.cpp C05
+struct X;//声明
+struct Y{
+	void f(X *);
+}；
+struct X{
+	private:
+		int i;
+	public:
+		void initialize();
+		friend void g(X *, int);//global friend
+		friend void Y::f(X *);//struct member friend
+		friend struct Z;//entire struct is friend
+		friend void h();
+};
+
+void X::initialize(){
+	i = 0;
+}
+void g(X *x, int i){
+	x->i = i;
+}
+。。。
+某些运算符的重装要用到friend
+
+一个类已经写好，没办法friend。
+编译时刻检查friend
+
+class VS struct
+一样表达类，有个细微差别
+没有写访问属性的，class缺省private，struct缺省public。
+
+十三，初始化列表
+构造函数是用来初始化对象中的成员变量的。但是当成员变量是对象时，需要用初始化列表来初始化它们。我们建议所有的成员变量都用初始化列表来做初始化。
+initializer list
+构造函数
+A():p(0){}
+
+class point{
+	private:
+		const float x, y;
+		point(float xa = 0.0, float ya =0.0):y(ya),x(xa){}
+};
+可以初始化任何类型数据
+这样和写到大括号里面有区别
+比构造函数里面东西早执行。内置类型无所谓，但是对象就不同。
+
+initialization va assignment
+
+student::student(string s):name(s){}
+
+student::student(string s){name = s;}
+结果都一样
+但是第一种叫初始化，第二种叫赋值。
+第二种做了两件事情，初始化，赋值。
+赋值之前做了初始化，因为没有明确给值，所以调用缺省构造函数。
+
+可以举例子。
+
+十四，对象组合
+用别的类的对象来组合成自己的类的对象，是一种重要的代码重用的方式。本课时探讨其中的细节问题
+oop，封装，继承，多态
+继承是代码重用一种方式
+
+composition：用已有的对象组成新的对象。
+
+汽车有发动机和轮胎
+
+对象制造对象，类的成员变量可以是另一个类的对象。
+
+对象或引用
+
+人，心脏在对象里面，书包发对象外面
+
+什么东西在哪里就叫内存模型
+对象可以通过对象本身，指针，引用访问
+java 一种内存模型，引用。
+
+class person{...};
+class currency{...};
+class saving_account{
+public:
+	saveing_account(const char *name, const char *address, int cents);
+	~saveing_account();
+	void print();
+private:
+	person m_saver;
+	currency m_blance;	
+};
+
+saveing_account::saveing_account(const char *name, const char *address, int cents):m_saver(name,address),m_blance(0,cents){}
+void saveing_account::print(){
+	m_saver.print();
+	m_balance.print();
+}
+
+初始化列表应该初始化所以成员变量
+
+十五，继承
+继承和组合不同，但都是软件重用
+已有的对象拼装对象（类），组合
+拿已有的类来，在类的基础上做点改造，得到一个新的类，继承
+
+区别，对象，类。实体，概念。
+
+inheritance，继承的东西
+成员变量
+成员函数
+接口（public成员函数，成员变量）
+
+一个类定义一个新类
+基类 超类 父类
+派生类 子类 
+
+#include <iostream>
+using namespace std;
+class A{
+public:
+	A()::i(0){cout << "A::A()"<<endl;}
+	～A{};
+	void print(){};
+protected:
+	void set(int i){this->i = i;}
+private:
+	int i;
+};
+class B:public A{
+	public:
+		void f(){
+		set(20);
+		//i=30;
+		print();}	
+};
+int main()
+{
+	B b;
+	//b.set(10);
+	b.print();
+	b.f();
+	return 0;
+}
+
+private子类也不能用，protected子类能用但别人不能操作。
+
+十六，子类父类关系
+重载
+class A{
+public:
+	A(int ii):i(ii) {}
+	~A(){}
+private:
+	int i;
+};
+class B:public A{
+
+};
+
+int main()
+{
+	B b;
+}
+继承父类，子类就有父类所有的东西。初始化子类，那子类内部父类部分要被初始化。B b，先调用A的 A(),发现没有，调用B自动缺省构造函数，先析构B，A后。
+可以在B中加：
+B():A(15){};
+
+初始化列表按声明的顺序，那父类最先，然后成员变量。
+
+class A{
+public:
+	A(int ii):i(ii) {}
+	~A(){}
+	void print(){}
+	void print(int i){}
+private:
+	int i;
+};
+class B:public A{
+	B():A(15){}
+	~B(){}
+	void print(){}
+};
+
+int main()
+{
+	B b;
+}
+名字隐藏，当子类和父类当中出现了同名，父类中有重载函数，子类当中出现了和父类相同的函数，那子类只有那一个函数了，只有子类自己的，父类的那些同名函数被隐藏了。
+
+并且此时子类和父类同名函数没关系。
+
+这两点只有C++是这样。
+为什么这样：因为关系，所以上面都应该没关系。
+重写
+
+十七，函数重载和默认参数
+ 本课时解释函数重载和函数参数表的默认参数。重载表示同名但是不同参数表的函数可以同时存在，当调用的时候按照所给参数来选择。参数表最后一个或几个参数可以具有默认值。默认值必须在调用的地方可见。
+
+函数名同，参数表同，返回类型不同，不能构成重载。
+
+leftover.cpp:
+void print(char *str,int width);
+void print(double d,int width);
+void print(long l,int width);
+void print(int i,int width);
+void print(char *str);
+
+print("pancakes", 15);
+print("sysup");
+print(1990.0,10);
+print(1999,12);
+print(1999L,15);
+
+overload.cpp  auto case
+void f(short i);
+void f(double d);
+f('a');
+f(2);
+f(2L);
+f(3.2);
+
+缺省参数
+stash（int size, int initquantity = 0);
+statsh(10);
+statsh(10, 2);
+
+缺省参数应该从最右边写过来。
+缺省值应该写在.h中，在cpp定义中不能这么写。
+（其实就是声明能写，定义不能）
+编译时刻的事情，
+a.cpp
+#include "a.h"
+#include <iostream>
+void f（int i, int j){
+	cout << i << " " << endl;
+}
+a.h
+void f(int i, int j = 0);
+main.cpp
+#include <iostream>
+void f(int i, int j = 10);
+int main()
+{
+	f(10);
+	return 0;
+}
+10 10;
+不要使用缺省构造函数，少打字的事情一般都不好。
+
+十八，内联函数
+函数调用有额外开销。
+
+int f(int i)
+{
+	return i*2;
+}
+int main(void)
+{
+	int a = 4;
+	int b = f(a);
+}
+
+函数参数，函数地址。
+返回值，pop。
+
+inline
+函数代码嵌到哪里去，但保持函数独立性（在code区动力）。
+
+inline int f(int i)
+{
+	return i*2;
+}
+int main(void)
+{
+	int a = 4;
+	int b = f(a);
+}
+
+
+int main()
+{
+	int a = 4;
+	int b = a*2;
+}
+类型检查是编译器做的，对运行无影响。
+
+最终可执行文件没有inline函数。
+.cpp,.h都必须重复说inline
+inline int plushone(int x);
+inline int plushone{return ++x;}
+声明inline，实现无inline，还是会调用。
+
+编译器一个时刻只能看到一个.cpp
+内联函数应将实现放到.h文件，如果在.cpp，在另一个.cpp使用这个内联函数就会出问题。
+例子：
+a.h
+inline void f(int i, int j);
+a.cpp
+#include "a.h"
+#include <iostream>
+inline void f(int i, int j)
+{
+	cout << i << " " << j << endl;
+}
+
+main.cpp
+#include "a.h"
+int main()
+{
+	f(10,10);
+	return 0;
+}
+ld出错，f不存在，main试图调用f函数，main.cpp不知道f的实现。a.cpp看到f是inline又不产生函数代码，应该将f的实现放到.h中。
+悬崖边竖个牌子warning，程序员都会掉下去的
+
+inline函数的定义是个声明。
+程序变长，省去调用函数开销，空间换时间。
+比c的宏要好，宏不做类型检查，inline要安全。
+
+inline可能不是inline，函数过于巨大，编译器就会不作出inline。比如递归，复杂循环。
+
+成员函数class声明时给出函数的实现，那这些函数都是inline。inline.cpp think-in-c++
+
+get,set函数，做成inline
+class cup{
+	int color;
+public:
+	int getColor(){return color;};
+	void setColor(int color){
+		this->color = color;
+	}
+};
+
+在.h中，在class外面定义函数为inline。think in c++
+
+小函数会自动inline
+2，3函数，小函数经常被调用。
+递归，超过20行不会。
+
+十九：const
+const对c++是变量，不是常数。
+编译器而言，变量要分配地址，常数编译器编译过程中记在内存表的一个值。
+
+编译器时刻知道值的const的。
+const int bufsize = 1024;
+extern const int bufsize;//和bufsize是不是const没关系。
+const在运行时刻不保证，只是编译时刻保证。
+const int size = 12;
+int a[size];//ok
+
+int x;
+cin >> x;
+const int size = x;
+double s[size];//error
+编译器需要知道刚进入函数时知道所有局部变量的大小，才能在栈中分配大小。
+
+int *p;
+const int *cip;
+//
+int i;
+ip = &i;
+cip = &i;
+//
+const int ci = 3;
+ip = &ci;//error
+cip = &ci;
+
+
+
+
+
