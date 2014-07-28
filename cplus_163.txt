@@ -794,6 +794,7 @@ const int size = x;
 double s[size];//error
 编译器需要知道刚进入函数时知道所有局部变量的大小，才能在栈中分配大小。
 
+
 int *p;
 const int *cip;
 //
@@ -806,6 +807,501 @@ ip = &ci;//error
 cip = &ci;
 
 
+char *s = "hello world";
+
+#include <iostream>
+using namespace std;
+int main()
+{
+	char *s = "hello world";
+	cout << s << endl;
+	s[0] = 'B';
+	cout << s << endl;
+	return 0;
+}
+
+stop record
+
+char *s = "hello world";//这个做法过时了
+"hello world"代码段
+程序运行起来，从操作系统得到一块独立的虚拟内存（从0开始），mmu翻译成物理物理，mmu内存保护。
+
+char *s = "hello world";//编译器报警告，只是编译器不知道你后面会不会修改s指向的地方。
+s[0] = 'B';//编译器不知道s指向一个不能那个改的地方
+改成const char *s = "hello world";
 
 
+char s[] = "hello world";//做了拷贝
+
+void f(const int *x);//保证对x指向的对象不能修改
+int a = 15;
+f(&a);
+const int b = a;
+f(&b);
+b = a+1;//eroor
+
+void fun(const int i)
+{
+	i++;//error,comile-time error
+}
+///
+int f3(){return 1;}
+const int f4(){return 1;}
+int main()
+{
+	const int j = f3();//ok
+	int k = f4();//but this works fine too
+	//值当然可以
+}
+
+传进传出地址的话，ConstPointer.cpp
+const Currentcy this_raise(42,38);
+整个对象是const，对象的值不能被修改，对象的函数就有问题了。编译器没法检查。
+
+screen marker
+
+//const，保证不修改类的成员变量
+int Date::set_day(int d)
+{
+	day = d;//ok,non-const so can modify
+}
+int Date::get_day() const
+{
+	day++;//error modifies data member
+	set_day(12);//error calls non-const member
+	return day;//ok
+}
+声明和定义的地方要重复
+int get_day() const;
+int get_day() const{return day;}
+const的意思是this是const的。
+
+二十，不可修改的对象
+整个对象const的用法。
+#include <iostream>
+using namespace std;
+class A{
+	int i;
+public:
+	A():i(0){}
+	void f(){cout << "f()" << endl;}
+	void f()const{cout << "f() const" <<　endl;}
+};
+
+int main()
+{
+	const A a;
+	a.f();
+	return 0;
+}
+//f() const
+overload:参数表不同 因为this也属参数表
+
+改
+#include <iostream>
+using namespace std;
+class A{
+	int i;
+public:
+	A(){}
+	void f(){cout << "f()" << endl;}
+	void f()const{cout << "f() const" <<　endl;}
+};
+
+int main()
+{
+	A a;//有const，构造必须初始化，因为const对象以后没办法修改a
+	a.f();
+	return 0;
+}
+
+改
+#include <iostream>
+using namespace std;
+class A{
+	const int i;
+public:
+	A():i(0){}//必须
+	void f(){cout << "f()" << endl;}
+	void f()const{cout << "f() const" <<　endl;}
+};
+
+int main()
+{
+	A a;
+	a.f();
+	return 0;
+}
+
+
+//
+class HasArray{
+	const int size;
+	int array[size];//error
+	...
+};
+有个成员变量const，不能做数组size，可以加static。或用枚举
+
+1，static const int size = 100；
+2，class HasArray{
+	enum{size = 100};
+	int array[size];//ok
+};
+
+二十一，引用
+引用是C++的一种掌握对象的方式，它通过给一个变量施加一个别名的方式来访问那个变量。本课时解释了引用的语法和实现细节。
+
+references：引用
+c++,内存模型，对象地方：堆栈，堆，数据区；
+访问对象方式：变量，指针，引用
+
+char c;//c是一个变量，里面放字符
+char *p = &c;//p是指针，*p是一个char
+char &r = c;//r是一个引用，r是c的引用，c是左值。
+初始化和赋值不同。引用定义时应该初始化，除了下2中情况。
+alias别名 引用
+一个东西的2个名字
+type &refname = name;
+
+1，参数表，2，成员变量。不需要给初始值。
+type &refname;
+绑定
+
+int x = 47;
+int &y = x;//y is a reference to y;
+cout << "y = " << y;
+y = 18;
+cout << "x = " << x;
+y是x的另一个名字，可以随意替换。
+初始化y时是y与x指定的那块内存绑定。
+
+引用初始化建立了一种绑定关系，定义时必须初始化；
+int x = 3;
+int &y = x;
+const int &z = x;//通过z不能修改x，x可变。
+
+void f(int &x);
+f(y);//初始化x在函数调用时。
+
+rules：
+绑定运行时刻不能变。
+void fun(int &);
+fun(i*3);//i*3有结果，但没有一个有名字的变量来放他的结果。
+引用初始化，赋值给引用的东西必须有一个位置（左值）。
+
+//think in c++ simple c++ reference
+int *f(int *x){
+	(*x)++;
+	return x;//safe,x is outside this scope
+}
+
+int &g(int &x){
+	x++;
+	return x;
+}
+
+int x;
+int &h(){
+	int q;
+	//return q; //error
+	return x;//
+}
+
+int main()
+{
+	int a = 0;
+	f(&a);//ugly(but explicit)
+	g(a);//clean(buf hidden)
+	h() = 16;
+	//*k() = 10;
+}
+
+引用 指针
+引用是const指针
+1，引用不能是null，指针可以
+2，引用基于一个存储在变量，给它起别名，指针不用基于已经存在的变量。
+3，引用不能改变，指针可以改
+
+java内存模型，对象在堆，访问对象都是指针（*取消了，不能做计算），在java称为引用。
+引用不能做引用之间赋值
+
+int x;
+int &a = x;
+int &b = a;//error 引用的引用是错误的。
+int &b = x;//ok
+b = a;//什么也没做
+
+1，没有引用的引用
+2，没有引用的地址
+int & *p;//error
+void f(int *&p);//ok
+3，没有数组的引用（引用不是一个实体）
+
+二十二，向上造型
+把子类的对象交给父类的指针或引用就成了向上造型。本课时研究了对象内的数据结构，并解释了向上造型。造型并不是类型转换。
+upcasting examples
+
+D is derived from B (D类有B类派生来)
+D => B
+D* => B*
+D& => B&
+
+
+B = D,为什么可以？
+对象内部结构，一个子类对象具有父类对象所以的东西，子类继承了父类，父类public东西子类也有。把子类对象当父类对象来用，调用父类public的函数都能接受，所以子类的东西可以赋值交给父类。多出的东西忽略。学生是个人，不把你当学生看，把你当人看。
+
+#include <iostream>
+using namespace std;
+class A{
+public:
+	int i;
+	A():i(10){}
+};
+class B:public A{
+private:
+	int j;
+public:
+	B():j(30){}
+	void f(){cout << "B.j=" << j << endl;}
+};
+int main()
+{
+	A a;
+	B b;
+	cout << a.i << " " << b.i << endl;
+	cout << sizeof(a) << " " << sizeof(b) << endl;
+
+	int *p = (int *) &a;
+	cout << p << " " << *p << endl;
+	*p = 20;
+	cout << a.i << endl;
+	p = (int *)&b;
+	cout << p << " " << *p << endl;
+	p++;
+	*p = 50;
+	b.f();
+	//const也可以，指针可以为所欲为
+	return 0;
+}
+
+子类对象当父类对象来看，upcast。（没有类型转换）
+double cast int，丧失了double一些数据，upcast数据没有丢。
+
+Manager pete("pete", "12345", "bakery");
+Employee *ep = &pete;//upcast
+Employee &er = pete;//upcast
+
+lose type information about the object:
+ep->print(cout);//print base class version
+
+二十三，多态性
+“你是一个Shape，所以你会render，那么，请render你自己吧”。当通过一个父类的指针或引用调用它父类具有的函数时，实际会调用所指的对象的类型的函数，这就是多态性。
+
+画图程序：
+circle rectangle ellipse
+
+operations:
+render
+move
+resize
+data:
+center
+
+以一个类型定义另外一个类型。
+class xypos{...};
+class shape{
+public:
+	shape();
+	virtual ~shape();
+	virtual void render();//子类重写了render，名称，参数表相同，那子类和父类同名的函数才有联系
+	void move(const xypos&);
+	virtual void resize();
+protected:
+	xypos center;
+};
+
+class ellipse:pbulic shape{
+public:
+	ellipse(float maj, float minr);
+	virtual void render();//will define own ,virtual可加可不加，父类virtual，子子孙孙都是virtual
+protected:
+	float major_axis, minor_axis;
+};
+
+class circle:public ellipse{
+public:
+	circle(float radius):ellipse(radius,radius){}
+	virtual void render();
+};
+
+void render(shape *p){
+	p->render();
+}
+
+void fun(){
+	ellipse ell(10,20);
+	ell.render();//ellipse
+	circle circ(40);
+	circ.render();//circle
+	render(&ell);//upcast ellipse
+	render(&circ);//upcast circle
+}
+vitual 告诉编译，对这个函数的调用，如果是通过指针或引用的话，要到运行期间确定是什么类型，这个指针或引用指向什么对象，调用这个对象的函数。
+
+polymorphism 多态性
+render函数中p是多态的。
+
+多态性建立2个基础上
+upcast
+动态绑定 dynamic binding
+	静态绑定：调用的函数是确定的，编译时确定的
+	动态绑定：运行时确定调用哪个函数
+
+p有一个静态类型shape *,还有动态类型 (运行确定)，如果函数是virtual就使用动态类型，函数不是virtual使用静态类型shape *;
+
+二十四，多态的实现
+任何一个类型有虚函数，这个类的对象就比正常的大一点；
+
+#include <iostream>
+using namespace std;
+clas A{
+public:
+	A():i(20){}
+	virtual void f(){cout << "A::fun()" << i << endl;}
+	int i;
+};
+int main()
+{
+	A a;
+	a.f();
+	cout << sizeof(a) << endl;
+	int *p = (int *)&a;
+	//p++;
+	cout << *p << endl;
+	return 0;
+}
+
+vptr:
+所有有虚函数的类的对象，最头上自动加上一个隐藏的指针，这个指针指向一个表，这个表叫vtable。vtable里面是类所有virtual函数的地址，vtable是类的，不是对象的。这个类的所有对象的vptr是一样。
+#include <iostream>
+using namespace std;
+clas A{
+public:
+	A():i(20){}
+	virtual void f(){cout << "A::fun()" << i << i << endl;}
+	int i;
+};
+class B:public A{
+	public:
+		B():j(20){];}
+		virtual void f(){cout << "B::f()" << j << endl;}
+		int j;
+};
+int main()
+{
+	A a;
+	B b;
+	A *p = &b;
+	p->f();//b的f
+	a = b;
+	a.f();//a的f
+	p = &a;
+	p->f();//a的f
+
+	int *r = (int *)&a;
+	int *t = (int *)&b;
+	*r = *t;
+	p->f();//b的f，但j不存在
+	return 0;
+}
+//赋值操作时vptr没有变
+
+子类vtable和父类的vtable结构是一样的（顺序一致），没有重写就是用父类的。
+ellipse elly(20f,40f);
+circle circ(60f);
+elly=circ;// 10 in 5?
+
+#include <iostream>
+using namespace std;
+clas A{
+public:
+	A():i(20){}
+	virtual void f(){cout << "A::fun()" << i << endl;}
+	int i;
+};
+int main()
+{
+	A a,b;
+	a.f();
+	cout << sizeof(a) << endl;
+	int *p = (int *)&a;
+	int *q = (int *)&b;
+	//p++;
+	cout << *p << endl;
+	cout << *q << endl;
+	int *x = (int *)*p;
+	cout << x << endl;
+	return 0;
+}
+
+。。。
+void func(ellipse &elly)
+{
+	elly.render();
+}
+circle circ(60f);
+func(circ);
+//引用就是指针，所以一样的
+
+shape *p = new ellipse(100f,200f);
+...
+delete p;
+析构是virtual的原因。
+类里面有一个virtual函数，那么析构应该是virtual的。
+
+所有的oop语言默认是virtual，c++默认不是。默认静态绑定，效率问题。
+
+ovreriding：
+如果父类和子类的两个函数是virtual的，名称，参数表相同，构成overrideing关系，重写，覆盖。
+class base{
+	public:
+		virtual void func();
+};
+class derived:public base{
+	public:
+		virtual void func();
+		//overrides base::func();
+};
+
+在重写函数里调用父类的函数
+void derived::func(){
+	cout << "" << endl;
+	base::func();//call to base
+}
+
+。。
+D从B继承而来
+D::f()返回B的f函数返回类型的子类。
+
+class expr{
+	public:
+		virtual expr* newexpr();
+		virtual expr& clone();
+		virtual expr self();
+};
+class binaryexpr:public expr{
+	public:
+	virtual binaryexpr *newexpr();
+	virtual binaryexpr &clone();
+	virtual binaryexpr self();//error
+	//不是upcast关系
+}
+
+overloading and virtuals
+class base{
+	public:
+		virtual void func();
+		virtual void func(int);
+};
+情况同无virtual一样。namehidding，只有c++存在。
 
