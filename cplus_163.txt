@@ -1305,3 +1305,100 @@ class base{
 };
 情况同无virtual一样。namehidding，只有c++存在。
 
+二十五，引用再研究
+本课时解释引用作为类的成员、引用作为函数参数和返回时的问题。
+
+一个类的成员是引用，当你声明它是没办法给他一个初始值。
+如果引用是全局或局部，需初始化。是函数参数或成员变量，无法初始化。
+
+class x{
+	public:
+	int &m_y;
+	x(int &a)；
+}；
+x::x(int &a) :m_y(a){}
+//在{}m_y=aa;这是赋值
+
+函数返回一个引用（同指针）
+
+#include <assert.h>
+const int size = 30;
+double myarr[size];
+double &subscript(const int i)
+{
+	return myarr[i];
+}
+int main()
+{
+	for(int i = 0; i < size; i++)
+		myarr[i] = i*0.5;
+	//引用变成值
+	double value = subscript(12);
+	//引用
+	subscripte(3) = 34.5;
+}
+
+。。。。
+person(const string &name, int weight);
+
+void func(const int &y, int &z)
+{
+	z = z*5;//ok
+	y += 8;//error
+}
+
+void func(int &);
+func(i*3);//error
+产生一个临时变量（const int)
+void f(const int &i)
+{
+	cout << i << endl;
+}
+int main()
+{
+	int i=3;
+	f(i*3);
+	return 0;
+}
+返回类型有const
+class A{
+public:
+	int i;
+	A():i(0){}
+};
+A f()//const A f() 返回的对象不能修改
+{
+	A a;
+	return a;
+}
+int g()
+{
+	int i = 10;
+	return i;
+}
+int main()
+{
+	f().i = 10;//f()函数返回对象
+	g() = 10;//error
+	A b;
+	f() = b;//f()返回的对象不知道在那
+	return 0;
+}
+
+二十六，拷贝构造1
+当需要用同类的一个对象来创建一个新的对象的时候，那个类的拷贝构造函数就会被调用来构造这个新的对象。本课时解释拷贝构造函数的用法。
+
+void func(currency p)
+{
+	cout << "x =" << p.dollars();
+}
+...
+currency bucks(100,0);
+fun(bucks);//bucks 和p没有关系
+两种可能性
+currency p = bucks;
+p = bucks;
+//定义 声明
+//赋值 初始化
+
+c11:howmany.cpp thinking int c++
