@@ -1402,3 +1402,82 @@ p = bucks;
 //赋值 初始化
 
 c11:howmany.cpp thinking int c++
+有的构造绕过了构造函数
+howmany h2 =h;//没有经过构造函数
+howmany h2(10) 和howmany h2 = 10相同。
+初始化可以还有一个地方
+
+拷贝构造：有一个构造函数，构造函数的参数是自己类const引用，用另外一个自己类对象初始化时会被调用。没有给，c++自己给。
+T::T(const T&);
+默认拷贝每一个成员变量。成员变量对成员变量的拷贝，如果成员是其他类对象，递归调用其他类拷贝构造函数。成员有指针，指针的拷贝，引用的拷贝。
+
+如果拷贝构造函数是自己类对象，传进去的参数要发生一个拷贝构造，如果这样，递归，出不来。
+
+如果是引用，不需要调用拷贝构造。
+
+二十七，拷贝构造II
+class person{
+	public:
+	person(const char *s);
+	~person();
+	void print();
+	//private:
+	char *name;
+};
+没有写拷贝构造，编译器自动给，新的对象的指针和老的对象指针指向同一个东西。
+person.cpp
+person::person(const char *s)
+{
+	name = new char[::strlen(s)+1];
+	::strcpy(name,s);
+}
+person ~persone()
+{
+	delete[] name;
+}
+main.cpp
+int main()
+{
+	person p1("john");
+	person p2(p1);
+	printf("p1.name=%p\n",p1.name);
+	printf("p2.name=%p\n",p2.name);
+	//free两次
+}
+在c++,cstring 有点不同，const，size_t
+persone::person(const person &w)
+{
+	name = new char[::strlen(w.name)+1];
+	::strcpy(name,w.name);
+}
+private是对类的，不是对对象，访问另外一个同类的对象的private的东西ok。？？
+
+person p1 = p2;//call
+person p1(p2);//call
+拷贝构造调用的地方：
+1，调用函数，函数的参数是对象本身。
+void roster(person);
+person chile("ruby");
+roster(child);//call
+2，
+person captain()
+{
+	person player("georag");
+	return player;
+}
+
+person who("");//call 几次
+
+
+main.cpp
+person f()
+{
+	person p1;
+	return p1;
+}
+int main()
+{
+	person p = f();
+
+	return 0;
+}
