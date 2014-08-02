@@ -2011,6 +2011,499 @@ vector<T>::vector(int size):m_size(size){
 	m_elements = new T[m_size];
 }
 
+三十五，模板II
+//bubble sort -- don't use it
+template < class T >
+void sort(vector<T> &arr)
+{
+	const size_t last = arr.size()-1;
+	for(int i = 0; i < last; i++){
+		for(int j = last; i < j; j--){
+			if(arr[j] < arr[j-1]){
+				swap(arr[j]),arr[j-1]);
+			}
+		}
+	}
+}
+template编译器是多遍扫描，swap也是模板
+< 有重载函数
+vector<int> vi(4);
+vi[0] = 4;
+vi[1] = 3;
+vi[2] = 7;
+vi[3] = 2;
+sort(vi);
+
+vector<string> vs;
+vs.push_back("fred");
+vs.push_back("ass");
+vs.push_back("ddafd");
+vs.push_back("lisa");
+sort(vs);
+//sort users operator< for comparison
+
+template <class key, class value>
+class hashTable
+{
+	const value& lookup(const key&)const;
+	void install(const key&, const value &);	
+};
+
+Vector<Vector<double*> >//note space > >
+Vector<int (*)(Vector<double> &, int)>
+
+template<class T, int bounds = 100>
+//calss说T是一种类型，后面确定
+class fix{
+	public:
+		fix();
+		T &operator[](int);
+	private:
+		T elements[bounds];//fixed size bounds;
+};
+fix<int, 50> v1;
+fix<int> v3;
+
+template和继承
+template<class A>
+class dev:public List<A>{....};
+
+template和template不能做继承，是做dev时种出List类。
+
+class sup:public List<emplyee*>{....};
+
+类模板，种2个类，v2, v3不是同一种类。
+编译都创建，但连接合并或改名字，改名字
+
+编译器中只有编译模块是一样的
+
+三十六，异常
+异常是运行时刻一定有可能发生的外界条件引起的问题。本课时解释异常的基本概念
+
+写的不好的代码不应该运行
+编译检查严格
+
+运行时刻发生的，处理可能发生的所有情况。
+
+read a file:
+open the file
+判断文件大小
+分配空间
+读文件到内存
+关闭文件
+
+问题不是程序的问题，而是外面的情况带来的问题。比如：文件不存在，被被人独占打开。文件是网络流文件的大小得不到（正在写）。文件太大。u盘，光盘，硬盘。
+程序处理这些问题，程序健壮。用户的折腾
+
+正常值和异常值放在一起
+
+异常机制，正常的事物逻辑放在一起
+try{
+	open the file;
+	....//上面5步骤
+}catch(file open failed){
+	dosomething;
+}catch(..){
+	..
+}catch(){
+	
+}catch(){
+	
+}catch(){
+	
+}
+
+exception
+问题的解决可能需要人的干预，或更高层的程序来选择。
+有人在别的地方来告诉程序怎么做。
+程序运行过程中，由于外界的条件而导致程序无法正常运行下去的，就是exception。
+有清晰的错误处理代码和正常食物处理代码
+
+
+三十七，异常的抛出和捕捉
+本课时解释异常如何抛出，抛出后如何找到对应的机制来处理。
+问题：
+数组的index越界了怎么办。
+1，不解决，renturn s[index];
+2，返回一个特殊的错误值；//c
+	任何返回值应该先检查
+3，die
+4，assert，不合适，表达式错的就退出
+	assert，程序本身代码的错误
+5，exception
+抛出一个异常。throw something;
+
+对c++来说可以throw任何东西。
+throw vectorIndexError(index);
+这个对象在那里，有异常，就检查抛出异常的那个大括号外面是什么，看外面是什么，下面不执行，就回到调用它的地方，然后再检查大括号外面，返回上次调用，直到外面有try，后面有对应的catch，然后catch代码块后面继续执行，不回去try块里面去了。
+
+catch里面throw（什么也不加），再将获得的再throw出去。
+
+一个catch捕捉所以异常，
+catch(...){}
+
+碰到异常，沿着调用的线路，直到catch的地方。
+
+输入输出中exception最多。
+
+
+catch过的异常对象会释放掉。
+throw exp； 
+throw；只在catch中用
+
+三十八，异常语句
+本课时解释异常语句的各种细节问题：异常捕捉的匹配方式、new的异常、构造函数中的异常等。
+
+
+try至少后面要有一个catch
+catch很像函数，...拿不到异常对象。
+匹配原则：
+完全匹配，基类，...，没有优先级，看catch顺序。
+
+void abc(int a):throw(MathErr, OtherErr){
+	...
+}
+//告诉调用这个程序的，我最多会抛出这些异常
+java异常在编译时刻检查，调用这个函数的函数要求处理这个异常。
+
+c++编译时不管，只是约束abc不能抛其他异常，如果抛了其他异常，抛出一个异常unexpected
+
+函数后面没有写throw，默认可以抛出任何异常，java默认不抛出。如果throw（）是承诺不抛出异常。
+
+
+new和异常
+new永远不给NULL，抛出异常bad_alloc；
+
+构造函数和异常
+如果抛出异常，构造没有完成，析构不会被调用.
+
+class A{
+	public:
+		A(){
+			//delete this;
+			throw 0;
+		}
+};
+int main()
+{
+	A* p = new A();//已经分配内存，但构造没完成，内存垃圾
+	delete p;
+	return 0;
+}
+
+
+异常抛出的是一个栈中对象，在栈底，使用引用，类似这样
+struct B{
+	vitual void print{}
+};
+struct D:public B{};
+try{
+	throw D("d error");
+}catch(B &b){
+	b.print();
+}
+
+三十九，流
+流是C++解决输入输出的方式，它把外部设备看成一维单方向的字节流，从而可以从流中读或解析数据，向流中写或格式化数据。
+stream
+
+文件有二进制和文本形式
+优势：安全。。。。
+确定：罗嗦，慢
+
+重载inserters <<  extractors >>
+
+what is a stream?
+一维单方向，流过去就没有了，读了就没有了，写进去就流下去了，不能在任意地方读写。
+c中文件不一样，文件是任意定位的，任意地方读写。
+
+istream ostream <iostream>
+ifstream ofstream <fstream>
+istrstream ostrstream <strstream>//过时
+istringstream ostringstream <sstream>//
+
+stream:
+>> extractors
+<< inserters
+manipulators ：change the stream state
+ohters
+
+文本流：所以输入输出都是在做解析，格式化
+	ASCII，
+
+二进制流：不以人的阅读为目的的文件
+不经过解析，格式化
+
+四十，流的运算符
+C++为流提供了专用的插入和解析运算符，我们可以为自己的类提供这两个运算符，还可以使用流的操纵运算。
+
+c++预先定义了4个流
+cin
+cout
+cerr
+clog
+
+istream & operator>>(istream & is, T &obj)
+{
+	return is;
+}
+
+cin >> a >> c因为返回是istream
+
+int get()
+istream &get(char &ch)
+get(char *buf, int limit, char delim='\n')
+getline(char *buf, int limit, char delim='\n')
+ignore(int limit=1, int delim = EOF)
+int gcout()
+void putback(char)
+char peek()
+
+ostream & operator<<(ostream & os, const T &obj)
+{
+	return os;
+}
+cout << a << b;
+
+put(char)
+flush()
+
+#include <iomanip>
+int n;
+cout << flush;
+cout.flush();
+cin >> hex >> n;
+endl//函数
+
+#include <iosteam>
+#include <iomanip>
+
+main(){
+	cout << setprecision(2) << 1000.243 << endl;
+	cout << setw(20) << "ok";
+	return 0;
+}
+1e03
+
+manipulator type
+dec,hex,oct  i/o
+endl	o
+flush	o
+setw(int) i/o
+setfill(ch) i/o
+setbase	 o
+ws i
+setprecision(int) o
+setiosflags(long) i/o
+resetiosflags(long) i/o
+
+set设置为1	   置位
+reset设置为0   复位
+
+ostream & mainip(ostream &out)
+{
+	...
+	return out;
+}
+ostream &tab(ostream &out){
+	return out << '\t';
+}
+cout << "hello" << tab << "world!" << endl;
+
+flag	purpose(when set)
+ios::skipws	
+ios::left,ios::right
+ios::internal
+ios::dec,ios::oct,ios::hex
+ios::showbase
+ios::showpoint
+ios::uppercase
+ios::showpos
+ios::scientific, ios::fixed
+ios::unitbuf
+
+manipulators:
+setiosflags(flags)
+resetiosflags(flags)
+stream member functions:
+setf(flags)
+unsetf(flags)
+
+
+四十一，STL
+STL是C++标准库中的标准模板库，它提供了容器和算法。本课时介绍STL的基本知识和几种常用容器的基本使用方法。
+
+strandard template library
+现成的
+
+containers
+vector 可变数组
+deque 双端队列
+list 双向链表
+sets and maps 集合，映射
+
+a pair class(pairs of anything)
+
+basic algorithms(sort,search,etc)函数模板
+
+std namespace
+
+stl里面都是小写字母
+
+containers algorithms iterators
+
+map ，vector， list
+
+#include <iostream>
+#include <vector>//命名空间std
+using namespace std;
+int main()
+{
+	vector<int> x;//stl是模板
+	for(int a = 0; a < 100; a++)
+		x.push_back(a);//放东西至vector，没有给初始大小，每次增大一块
+	vector<int>::iterator p;//因为是模板做出来的类，所以类要带int，iterator是前面类里的类型。
+	//p是一个指针，*p打印int，*被overload
+	for(p=x.begin(); p < x.end(); p++)
+		cout << *p << " ";
+	return 0;
+}
+
+
+list要 p!=s.end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+上面例子都需全局重载函数
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
