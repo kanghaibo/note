@@ -1027,7 +1027,7 @@ java内存模型，对象在堆，访问对象都是指针（*取消了，不能
 
 int x;
 int &a = x;
-int &b = a;//error 引用的引用是错误的。
+int &&b = a;//error 引用的引用是错误的。
 int &b = x;//ok
 b = a;//什么也没做
 
