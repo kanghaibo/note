@@ -1478,6 +1478,1059 @@ person f()
 int main()
 {
 	person p = f();
-
+	/*person @tmp = f();
+	person p = @tmp;*/
+	//person p = ip;
+	//两种可能
 	return 0;
 }
+
+编译器可能会把它认为不必要的拷贝优化掉
+
+person copy_func(char *who)
+{
+	person local(who);
+	local.print();
+	return local;//copy ctor called
+}
+person nocopy_func(char *who)
+{
+	return person(who);
+	//大多数编译会优化掉拷贝构造
+}//no copy needed
+
+初始化，任何对象只能初始化一次
+
+class person{
+public:
+	person(const string&);
+	~person();
+	void print();
+private:
+	string name;
+}
+//不需要拷贝构造函数
+因为string类有拷贝构造函数，但指针没有
+
+你写类就为这个类写拷贝构造
+一个类（暂时）：
+构造函数
+virtual析构函数
+拷贝构造函数
+
+不希望被拷贝，声明私有的拷贝构造函数，就没法拷贝对象，函数参数不能是对象本身。
+
+java没有拷贝构造函数，java对象都是指针来操作的。
+
+二十八，静态对象
+如果一个对象是静态的，它的构造时机就很有讲究。本课时解释静态对象的空间分配和构造的问题。
+
+static有两种完全不同的含义。
+c++更复杂，static的成员变量，成员函数
+static成员变量----在所有对象之间共享
+static成员函数----在所有对象之间共享，只能访问静态成员变量和静态成员函数
+class x{
+	x(int,int);
+	~x();
+}
+void f()
+{
+	static x my_x(10,20);
+	//存储是全局，初始化是局部的
+	//第一次进这个函数初始化
+	//c++的一起都可以变成c
+	//链接的时候分配的空间
+	//伴随一个隐藏的标识已经被初始化
+}
+java保存任何对象都是初始化后才能被得到
+
+全局变量的析构是程序结束的时候发生。
+静态存储区是链接时分配空间
+全局变量的构造执行是mian函数之前。
+
+main （） exits
+exit（）is called
+
+多个文件中多个全局变量那个先初始化编译器来定
+全局变量之间初始化之间有依赖，跨文件的构造无依据。不要这么干，或放一起。
+java没有全局变量
+
+二十九，静态成员
+如果一个类有静态的成员变量，那么它实际上还是全局变量，只是访问是受限于类。另外，类也可以有静态的成员函数。本课时解释静态成员的细节。
+
+对象和对象之间相同是静态的。
+static成员，是类的，不是对象的。
+静态成员变量，在所有对象存在且值一致。
+class A{
+public:
+	A(){i = 0;}
+	//A():i(0){}; error,A::i是静态成员，只能在定义的地方做初始化，初始化列表只能初始化非静态
+	void print(){cout << i <<　endl;}
+	void set(int ii){ i = ii;}
+	//void set(int i){this->i = i;}
+	//i还是类的成员变量 ok
+	static void say(int ii){ cout << ii << i << endl;}
+	//函数是全局，不跟对象走，但访问属性变了
+	//static void say(int ii){ cout << ii << k << endl;} error
+	//static void say(int ii){ cout << ii << this->i << endl;} error
+private:
+	int k;
+	static int i;//int i;
+	//如果这个i是public
+	// cout << a.i << endl; ok ,private error
+	// cout << A::i << endl; ok,private error
+};
+int main()
+{
+	A a,b;
+	a.set(10);
+	b.print();
+
+	a.say(0);
+	A::say(0);
+	return 0;
+}
+类里面东西都是声明，而不是定义
+所以在某个.cpp中要定义int A::i;
+改成static int i;是错误的，和类的静态成员访问属性违背。类的静态成员可能在外部被访问。
+可以int A::i = 20;//
+inline的body可以放在.h
+
+如果有静态成员变量，一定要有对应的.cpp定义静态成员。
+
+
+三十，运算符重载-基本规则
+当一个运算符要对某个类的对象做操作时，可以根据所操作的类型执行不同的重载函数。本课时解释运算符重载的基本规则。
+overloading operators
+在c++里几乎可以重载所有运算符。
+重载运算符，写函数改变运算符的行为，当这些运算符要对你定义的类的对象去做运算，不使用默认的运算功能，而使用你的运算功能。
+
+能：
++ = * / % ^ & | ~
+= < > += -= *= /= %=
+^= &= != << >> >>= <<= ==
+!= <= >= ! && || ++ --
+, ->* -> () []
+new delete
+new[] delete[]
+
+不能：
+. .* :: ?:
+sizeof typeid(给出类型的ID)
+static_cast dynamic_cast const_cast
+reinterpret_cast
+
+1，只有已经可以存在的能被重载
+2，只能对一个类或枚举类型做重载运算符
+3，重载运算符必须保持原有操作数的个数
+4，优先级不能改
+
+operator *(...)
+
+可以作为成员函数：
+const String String::operator +(const String &that)
+可以作为一个全局函数：
+const String operator+(const String &r,const String &l)
+
+how to overload
+1,作为成员函数
+	this是第一个参数，不会在receiver上做类型转换（receiver决定了操作符用那个的），必须有类的访问权限
+//x+3 double 测试
+class Integer{
+public:
+	Integer(int n = 0):i(n){}
+	const Integer operator+(const Integer &n) const{
+		return Integer(i+n.i);
+	}///const a+b=6 error
+	const Integer operator-() const{
+		return Integer(-i);
+	}// z = -x;//z.operator=(x.operator-());制作了一个新的对象给z
+private:
+	int i;
+}
+Integer x(1), y(5), z;
+x+y;======= x.operator+(y);
+运算符左边那个叫receiver,决定+用那个+
+z = x+y;//ok receiver x
+z = x+3;//ok receiver 3转换为Integer
+z = 3+y;//编译器从左向右扫描，3 receiver,不做类型转，需要一个函数将Integer转换为int，没有所以编译错误
+
+2，作为全局函数
+	多一个参数，类型转换在2个操作数都可以，能被作为友元
+
+class Integer{
+	friend const Integer operator+(const Integer &lhs, const Integer& rhs);
+};
+const Integer operator+(const Integer &lhs, const Integer& rhs)
+{
+	return Integer(lhs.i+rhs.i);
+}
+Integer x, y;
+x+y; // operator+(x,y);
+z = x+y;
+z = x+3;
+z = 3+y;//ok 整数+没法做，所以选择Integer的+
+z = 3+7;//error，3+7 结果然后转换Integer
+
+
+选择：tips
+1，单目应该做成成员的
+2，= () [] -> ->*必须是成员的
+3，赋值应该是成员的
+4，所有其他的二元做出非成员的。
+
+三十一，运算符重载---原型
+本课时解释运算符重载时，各种运算符的基本原型
+参数
+1，传进去的一定是对象引用
+2，运算符会不会修改算子，不会const，会的不const ++ -- 赋值
+3，全局也一样
+返回
+1，决定返回是对自己修改还是制造新的对象
+2，新的对象能否被赋值
+	+ a+b = 6,//const，不能做左值
+	赋值//引用，可以做左值
+	[],//引用，可以做左值
+
+
++ - * /%^ & | ~
+const T operatorX(const T&l, const T&r)const;
+
+! && || < <= == >= >
+bool operatorX(const T&l, const T&r)const;
+
+[]
+T&T::operator[](int index);
+
+++ --
+class Integer{}
+const Integer & operator++();//prefix ++
+const Integer operator++(int);//postfix ++
+const Integer &operator--();//perfix --
+const Integer operator--(int);//postfix --
+}
+const Integer &Integer::operator++(){
+	*this += 1;//increment
+	return *this;//fetch
+}
+const Integer Integer::operator++(int){
+	Integer old(*this);//fetch
+	++(*this);//increment
+	return old;//return
+}
+
+Integer x(5);
+++x;//call x.operator++();
+x++;//call x.operator++(0);
+
+关系运算：
+class Integer {
+	bool operator==(const Integer& rhs)const;
+	bool operator!=(const Integer& rhs) const;
+	bool operator<(const Integer& rhs) const;
+	bool operator>(const Integer& rhs) const;
+	bool operator<=(const Integer& rhs) const;
+	bool operator<=(const Integer& rhs) const;
+}
+bool operator==(const Integer& rhs) const{
+	return i == rhs.i;
+}
+bool operator!=(const Integer& rhs) const
+{
+	return !(*this==rhs);
+}
+bool operator<(const Integer& rhs) const
+{
+	return i < rhs.i;
+}
+bool operator>(const Integer& rhs) const
+{
+	return rhs < *this;
+}
+bool operator<=(const Integer& rhs) const
+{
+	return !(rhs < *this);
+}
+bool operator>=(const Integer& rhs) const
+{
+	return !(*this < rhs);
+}
+//改变代码量少，所有函数是inline，性能没损失
+
+[]
+表达一种容器的概念
+vector.h vector.cpp
+class Vector{
+public:
+	Vector(int size):m_size(size){
+		m_array = new int[size];
+	}
+	~Vector(){delete m_array;}
+	int &operator[](int index){
+		return m_array[index];
+	}
+private:
+	int m_size;
+	int *m_array;
+};
+
+三十二，运算符重载--赋值
+本课时解释赋值运算符重载时的各种细节。
+MyType b;
+MyType a = b;//拷贝构造
+a = b;//赋值
+拷贝构造做了一个新的对象，赋值是将一个新的对象的值赋值给已有的对象。
+
+class fi{
+public:
+	fi(){};
+};
+class fee{
+public:
+	fee(int){}
+	fee(const fi&){}
+};
+int main()
+{
+	fee fee = 1;//fee(int)
+	fi fi;
+	fee fum = fi;//fee(fi)
+	fum = fi;//赋值，先制造一个新的再赋值
+}
+没有operator=(type),系统自己给一个，成员赋值,同拷贝构造。
+class cargo{
+public:
+	cargo& operator=(const cargo&){
+		cout << "insid cargo::operator=()" << endl;
+		return *this;
+	}
+};
+class truck{
+	cargo b;
+};
+int main()
+{
+	truck a, b;
+	a = b;//prints:"inside cargo:...."
+}
+
+自己写，必须是成员函数，对自己做赋值，然后返回自己
+T &T::operator=(const T& rhs){
+	if(this != &rhs){
+		//perform assignment;
+	}
+	return *this;
+}
+
+...
+class A{
+	char *p;
+	A& operator=(const A &that){
+		delete p;//如果that和shis同，就丢了
+		p = new [strlen(that.p)+1];
+		strcpy(p,that.p);
+		return *this;
+	}
+}
+class cargo{
+public:
+	cargo& operator=(const cargo&){
+		cout << "insid cargo::operator=()" << endl;
+		return *this;
+	}
+};
+class truck{
+	cargo b;
+};
+int main()
+{
+	truck a, b;
+	a = b;//prints:"inside cargo:...."
+}
+
+=重载，如果有指针动态分配内存，要自己写，没有可以用系统
+
+三十三，运算符重载---类型转换
+value class
+类的作用是表达值
+1，看上去像基本数据类型
+2，可以被函数传入传出
+3，有需要被重载的运算符
+分数的+ -
+4，value calss需要和其他类型进行转换
+分数+ -
+复数 日期 
+
+类型转换
+编译器会做一些自动转换
+构造函数只有单个参数
+类型转换的运算符
+
+class pathname{
+	string name;
+public:
+	pathname(const string &);
+	~pathname();
+};
+string abc("abc");
+string abc = "abc";
+pathname xyz(abc);//直接做
+xyz = abc;// abc == > pathname
+//先做一个对象，再赋值
+
+class one{
+public:
+	one(){}
+}；
+class two{
+public:
+	two(const one &){}
+};
+
+void f(two){}
+int main()
+{
+	one one;
+	f(one);//wants a two, has a one
+	//先用two的构造函数制造
+}
+
+不想让编译器调用这些构造函数自动转换
+explicit two(const one &){}
+这个函数只能做构造函数，不能做自动类型转换
+f(two(one));
+
+
+可以做专用的类型转换函数
+函数自动被调用，返回类型同函数名字
+,没有返回类型，名字就说明了他返回类型
+operator A::double()const{
+	return numberator_/(double)denominator;
+}
+A r(1,3);
+double d = 1.3*r;//r-->double
+/。。。。
+X::operator T();
+X对象转换为T
+没有参数，可以有const，没有返回对象
+
+任意类型：
+T->T& //赋值   初始化
+T&->T //赋值
+T*=>void *//
+T[]->T *//
+T*->T[]
+T->const T
+
+初始化是绑定，赋值是赋值
+T->C
+if C(T)是一个C类的构造函数
+if C()是一个T类的转换函数
+
+如果都有呢
+class orange;
+class apple{
+	public:
+	operator orange()const;
+	//convert apple to orange
+};
+class orange{
+	public:
+	orange(apple);
+	//可以加 explicit
+	//convert apple to orange
+};
+void f(orange){}
+int main()
+{
+	apple a;
+	f(a);//error 无法选择那一个
+}
+
+一般尽量别用，自动做到东西，没有意识就帮你做了，尽量少用自动帮你做的
+
+double toDouble()const;
+
+三十四，模板I
+模板是一种代码实现方式。通过声明函数模板或类模板，在需要的时候编译器会为你产生所需的特定类型的函数或模板。本课时解释模板的基础知识。
+
+类型成为模板的参数
+函数模板，类模板
+用模板做出来的函数，做出来的模板
+模板函数，模板类
+
+template <class T>
+void swap(T &x, T &y)
+{
+	T temp = x;
+	x = y;
+	y = temp;
+}
+
+T函数参数类型，函数返回类型，函数里面定义
+模板不是函数，模板是声明
+看到template什么也不干，当遇到调用，就种一个swap。告诉编译怎么做出函数
+
+swap(int ,int);//ok
+swap(double, double);//ok
+swap(int, double);//error
+希望只有一种类型，不类型转换，用模板就不做类型转换，模板就不认可
+
+重载原则：
+1，唯一匹配
+2，唯一模板匹配
+3，函数重载
+
+template < class T >
+void foo(void){...}
+foo<int>();
+foo<float>();
+
+
+
+
+template <class T>
+class vector{
+public:
+	vector(int);
+	~vector();
+	vector(const vector &);
+	vector &operator=(const vector &);
+	T &operator[](int);
+private:
+	T *m_elements;
+	int m_size;
+};
+vector<int> v1(100);
+vector<complex> v2(256);
+v1[20] = 10;
+v2[20] = v1[20];//ok if int->complex //defined
+类模板的每一个成员函数都是函数模板
+template <class T>
+vector<T>::vector(int size):m_size(size){
+	m_elements = new T[m_size];
+}
+
+三十五，模板II
+//bubble sort -- don't use it
+template < class T >
+void sort(vector<T> &arr)
+{
+	const size_t last = arr.size()-1;
+	for(int i = 0; i < last; i++){
+		for(int j = last; i < j; j--){
+			if(arr[j] < arr[j-1]){
+				swap(arr[j]),arr[j-1]);
+			}
+		}
+	}
+}
+template编译器是多遍扫描，swap也是模板
+< 有重载函数
+vector<int> vi(4);
+vi[0] = 4;
+vi[1] = 3;
+vi[2] = 7;
+vi[3] = 2;
+sort(vi);
+
+vector<string> vs;
+vs.push_back("fred");
+vs.push_back("ass");
+vs.push_back("ddafd");
+vs.push_back("lisa");
+sort(vs);
+//sort users operator< for comparison
+
+template <class key, class value>
+class hashTable
+{
+	const value& lookup(const key&)const;
+	void install(const key&, const value &);	
+};
+
+Vector<Vector<double*> >//note space > >
+Vector<int (*)(Vector<double> &, int)>
+
+template<class T, int bounds = 100>
+//calss说T是一种类型，后面确定
+class fix{
+	public:
+		fix();
+		T &operator[](int);
+	private:
+		T elements[bounds];//fixed size bounds;
+};
+fix<int, 50> v1;
+fix<int> v3;
+
+template和继承
+template<class A>
+class dev:public List<A>{....};
+
+template和template不能做继承，是做dev时种出List类。
+
+class sup:public List<emplyee*>{....};
+
+类模板，种2个类，v2, v3不是同一种类。
+编译都创建，但连接合并或改名字，改名字
+
+编译器中只有编译模块是一样的
+
+三十六，异常
+异常是运行时刻一定有可能发生的外界条件引起的问题。本课时解释异常的基本概念
+
+写的不好的代码不应该运行
+编译检查严格
+
+运行时刻发生的，处理可能发生的所有情况。
+
+read a file:
+open the file
+判断文件大小
+分配空间
+读文件到内存
+关闭文件
+
+问题不是程序的问题，而是外面的情况带来的问题。比如：文件不存在，被被人独占打开。文件是网络流文件的大小得不到（正在写）。文件太大。u盘，光盘，硬盘。
+程序处理这些问题，程序健壮。用户的折腾
+
+正常值和异常值放在一起
+
+异常机制，正常的事物逻辑放在一起
+try{
+	open the file;
+	....//上面5步骤
+}catch(file open failed){
+	dosomething;
+}catch(..){
+	..
+}catch(){
+	
+}catch(){
+	
+}catch(){
+	
+}
+
+exception
+问题的解决可能需要人的干预，或更高层的程序来选择。
+有人在别的地方来告诉程序怎么做。
+程序运行过程中，由于外界的条件而导致程序无法正常运行下去的，就是exception。
+有清晰的错误处理代码和正常食物处理代码
+
+
+三十七，异常的抛出和捕捉
+本课时解释异常如何抛出，抛出后如何找到对应的机制来处理。
+问题：
+数组的index越界了怎么办。
+1，不解决，renturn s[index];
+2，返回一个特殊的错误值；//c
+	任何返回值应该先检查
+3，die
+4，assert，不合适，表达式错的就退出
+	assert，程序本身代码的错误
+5，exception
+抛出一个异常。throw something;
+
+对c++来说可以throw任何东西。
+throw vectorIndexError(index);
+这个对象在那里，有异常，就检查抛出异常的那个大括号外面是什么，看外面是什么，下面不执行，就回到调用它的地方，然后再检查大括号外面，返回上次调用，直到外面有try，后面有对应的catch，然后catch代码块后面继续执行，不回去try块里面去了。
+
+catch里面throw（什么也不加），再将获得的再throw出去。
+
+一个catch捕捉所以异常，
+catch(...){}
+
+碰到异常，沿着调用的线路，直到catch的地方。
+
+输入输出中exception最多。
+
+
+catch过的异常对象会释放掉。
+throw exp； 
+throw；只在catch中用
+
+三十八，异常语句
+本课时解释异常语句的各种细节问题：异常捕捉的匹配方式、new的异常、构造函数中的异常等。
+
+
+try至少后面要有一个catch
+catch很像函数，...拿不到异常对象。
+匹配原则：
+完全匹配，基类，...，没有优先级，看catch顺序。
+
+void abc(int a):throw(MathErr, OtherErr){
+	...
+}
+//告诉调用这个程序的，我最多会抛出这些异常
+java异常在编译时刻检查，调用这个函数的函数要求处理这个异常。
+
+c++编译时不管，只是约束abc不能抛其他异常，如果抛了其他异常，抛出一个异常unexpected
+
+函数后面没有写throw，默认可以抛出任何异常，java默认不抛出。如果throw（）是承诺不抛出异常。
+
+
+new和异常
+new永远不给NULL，抛出异常bad_alloc；
+
+构造函数和异常
+如果抛出异常，构造没有完成，析构不会被调用.
+
+class A{
+	public:
+		A(){
+			//delete this;
+			throw 0;
+		}
+};
+int main()
+{
+	A* p = new A();//已经分配内存，但构造没完成，内存垃圾
+	delete p;
+	return 0;
+}
+
+
+异常抛出的是一个栈中对象，在栈底，使用引用，类似这样
+struct B{
+	vitual void print{}
+};
+struct D:public B{};
+try{
+	throw D("d error");
+}catch(B &b){
+	b.print();
+}
+
+三十九，流
+流是C++解决输入输出的方式，它把外部设备看成一维单方向的字节流，从而可以从流中读或解析数据，向流中写或格式化数据。
+stream
+
+文件有二进制和文本形式
+优势：安全。。。。
+确定：罗嗦，慢
+
+重载inserters <<  extractors >>
+
+what is a stream?
+一维单方向，流过去就没有了，读了就没有了，写进去就流下去了，不能在任意地方读写。
+c中文件不一样，文件是任意定位的，任意地方读写。
+
+istream ostream <iostream>
+ifstream ofstream <fstream>
+istrstream ostrstream <strstream>//过时
+istringstream ostringstream <sstream>//
+
+stream:
+>> extractors
+<< inserters
+manipulators ：change the stream state
+ohters
+
+文本流：所以输入输出都是在做解析，格式化
+	ASCII，
+
+二进制流：不以人的阅读为目的的文件
+不经过解析，格式化
+
+四十，流的运算符
+C++为流提供了专用的插入和解析运算符，我们可以为自己的类提供这两个运算符，还可以使用流的操纵运算。
+
+c++预先定义了4个流
+cin
+cout
+cerr
+clog
+
+istream & operator>>(istream & is, T &obj)
+{
+	return is;
+}
+
+cin >> a >> c因为返回是istream
+
+int get()
+istream &get(char &ch)
+get(char *buf, int limit, char delim='\n')
+getline(char *buf, int limit, char delim='\n')
+ignore(int limit=1, int delim = EOF)
+int gcout()
+void putback(char)
+char peek()
+
+ostream & operator<<(ostream & os, const T &obj)
+{
+	return os;
+}
+cout << a << b;
+
+put(char)
+flush()
+
+#include <iomanip>
+int n;
+cout << flush;
+cout.flush();
+cin >> hex >> n;
+endl//函数
+
+#include <iosteam>
+#include <iomanip>
+
+main(){
+	cout << setprecision(2) << 1000.243 << endl;
+	cout << setw(20) << "ok";
+	return 0;
+}
+1e03
+
+manipulator type
+dec,hex,oct  i/o
+endl	o
+flush	o
+setw(int) i/o
+setfill(ch) i/o
+setbase	 o
+ws i
+setprecision(int) o
+setiosflags(long) i/o
+resetiosflags(long) i/o
+
+set设置为1	   置位
+reset设置为0   复位
+
+ostream & mainip(ostream &out)
+{
+	...
+	return out;
+}
+ostream &tab(ostream &out){
+	return out << '\t';
+}
+cout << "hello" << tab << "world!" << endl;
+
+flag	purpose(when set)
+ios::skipws	
+ios::left,ios::right
+ios::internal
+ios::dec,ios::oct,ios::hex
+ios::showbase
+ios::showpoint
+ios::uppercase
+ios::showpos
+ios::scientific, ios::fixed
+ios::unitbuf
+
+manipulators:
+setiosflags(flags)
+resetiosflags(flags)
+stream member functions:
+setf(flags)
+unsetf(flags)
+
+
+四十一，STL
+STL是C++标准库中的标准模板库，它提供了容器和算法。本课时介绍STL的基本知识和几种常用容器的基本使用方法。
+
+strandard template library
+现成的
+
+containers
+vector 可变数组
+deque 双端队列
+list 双向链表
+sets and maps 集合，映射
+
+a pair class(pairs of anything)
+
+basic algorithms(sort,search,etc)函数模板
+
+std namespace
+
+stl里面都是小写字母
+
+containers algorithms iterators
+
+map ，vector， list
+
+#include <iostream>
+#include <vector>//命名空间std
+using namespace std;
+int main()
+{
+	vector<int> x;//stl是模板
+	for(int a = 0; a < 100; a++)
+		x.push_back(a);//放东西至vector，没有给初始大小，每次增大一块
+	vector<int>::iterator p;//因为是模板做出来的类，所以类要带int，iterator是前面类里的类型。
+	//p是一个指针，*p打印int，*被overload
+	for(p=x.begin(); p < x.end(); p++)
+		cout << *p << " ";
+	return 0;
+}
+
+
+list要 p!=s.end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+上面例子都需全局重载函数
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
